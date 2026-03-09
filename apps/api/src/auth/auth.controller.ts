@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from '@experiment/shared';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { RegisterDto, LoginDto, ApiErrorResponseDto } from '@experiment/shared';
+import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiConflictResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -14,7 +14,14 @@ export class AuthController {
     status: 201,
     description: 'User successfully registered, returns JWT.',
   })
-  @ApiResponse({ status: 409, description: 'Username already exists.' })
+  @ApiBadRequestResponse({ 
+      description: 'Invalid input data (Zod Validation Error).',
+      type: ApiErrorResponseDto
+  })
+  @ApiConflictResponse({ 
+      description: 'Username already exists.',
+      type: ApiErrorResponseDto
+  })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
@@ -25,7 +32,14 @@ export class AuthController {
     status: 200,
     description: 'User successfully logged in, returns JWT.',
   })
-  @ApiResponse({ status: 401, description: 'Invalid credentials.' })
+  @ApiBadRequestResponse({ 
+      description: 'Invalid input data.',
+      type: ApiErrorResponseDto
+  })
+  @ApiUnauthorizedResponse({ 
+      description: 'Invalid credentials.',
+      type: ApiErrorResponseDto
+  })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }

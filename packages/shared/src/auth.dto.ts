@@ -14,3 +14,13 @@ export const LoginSchema = z.object({
 });
 
 export class LoginDto extends createZodDto(LoginSchema) {}
+
+export const ApiErrorResponseSchema = z.object({
+  statusCode: z.number().describe('The HTTP status code of the error'),
+  message: z.union([z.string(), z.array(z.string())]).describe('A descriptive error message or array of messages'),
+  error: z.string().describe('The type of error (e.g., Bad Request, Unauthorized, Not Found)'),
+  timestamp: z.string().optional().describe('ISO timestamp of when the error occurred'),
+  path: z.string().optional().describe('The API path where the error occurred'),
+});
+
+export class ApiErrorResponseDto extends createZodDto(ApiErrorResponseSchema) {}
