@@ -12,6 +12,7 @@ import { FormError } from "@/components/ui/FormError";
 
 export function LoginForm() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
   const { login, error, isLoading } = useAuthStore();
   const setModel = useFormModelStore((s) => s.setModel);
 
@@ -19,6 +20,11 @@ export function LoginForm() {
     setModel(loginFormModel);
     return () => setModel(null);
   }, [setModel]);
+
+  // If already logged in (access_token in store), go to dashboard
+  useEffect(() => {
+    if (user?.access_token) router.replace("/dashboard");
+  }, [router, user?.access_token]);
 
   const onSubmit = async (data: LoginDto) => {
     const success = await login(data);
