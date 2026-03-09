@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@import "./layouts/auth.css";
+@import "./layouts/dashboard.css";
+@import "./components/forms.css";
+@import "./components/buttons.css";

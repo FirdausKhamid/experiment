@@ -1,5 +1,6 @@
 @import "tailwindcss";
-
+@import "../styles/main.css";
+/* Default CSS from NextJS */
 :root {
   --background: #ffffff;
   --foreground: #171717;
