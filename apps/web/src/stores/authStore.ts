@@ -8,7 +8,7 @@ interface AuthState {
   user: AuthResponseDto | null;
   isLoading: boolean;
   error: Failure | null;
-  login: (credentials: LoginDto) => Promise<void>;
+  login: (credentials: LoginDto) => Promise<boolean>;
   register: (userData: RegisterDto) => Promise<void>;
   logout: () => void;
 }
@@ -26,10 +26,11 @@ export const useAuthStore = create<AuthState>()(
 
         if (isFailure(result)) {
           set({ error: result, isLoading: false });
-          return;
+          return false;
         }
 
         set({ user: result, isLoading: false });
+        return true;
       },
 
       register: async (userData) => {

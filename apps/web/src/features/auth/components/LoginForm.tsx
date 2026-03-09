@@ -2,15 +2,16 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useFormModelStore } from "@/stores/formModelStore";
 import { LoginSchema, LoginDto } from "@experiment/shared";
 import { FormBuilder } from "@/utils/forms/FormBuilder";
 import { loginFormModel } from "@/models/form/auth";
 import { FormError } from "@/components/ui/FormError";
-import { isFailure } from "@/utils/error";
 
 export function LoginForm() {
+  const router = useRouter();
   const { login, error, isLoading } = useAuthStore();
   const setModel = useFormModelStore((s) => s.setModel);
 
@@ -20,7 +21,8 @@ export function LoginForm() {
   }, [setModel]);
 
   const onSubmit = async (data: LoginDto) => {
-    const result = await login(data);
+    const success = await login(data);
+    if (success) router.push("/dashboard");
   };
 
   return (
