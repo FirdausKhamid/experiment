@@ -58,3 +58,34 @@
   line-height: 1.25rem;
   color: var(--color-gray-900);
 }
+
+.form-error-alert {
+  background-color: #fef2f2;
+  border-left: 4px solid #f87171;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.form-error-alert-inner {
+  display: flex;
+}
+
+.form-error-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.form-error-icon {
+  height: 1.25rem;
+  width: 1.25rem;
+  color: #f87171;
+}
+
+.form-error-content {
+  margin-left: 0.75rem;
+}
+
+.form-error-text {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #b91c1c;
+}
