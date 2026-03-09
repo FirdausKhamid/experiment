@@ -1,19 +1,16 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
 
 export const RegisterSchema = z.object({
   username: z.string().min(1, 'Username is required').describe('The username of the new user'),
   password: z.string().min(6, 'Password must be at least 6 characters').describe('The password for the new user (minimum 6 characters)'),
 });
-
-export class RegisterDto extends createZodDto(RegisterSchema) {}
+export type RegisterDto = z.infer<typeof RegisterSchema>;
 
 export const LoginSchema = z.object({
   username: z.string().min(1, 'Username is required').describe('The username to log in with'),
   password: z.string().min(1, 'Password is required').describe('The password to log in with'),
 });
-
-export class LoginDto extends createZodDto(LoginSchema) {}
+export type LoginDto = z.infer<typeof LoginSchema>;
 
 export const ApiErrorResponseSchema = z.object({
   statusCode: z.number().describe('The HTTP status code of the error'),
@@ -22,5 +19,10 @@ export const ApiErrorResponseSchema = z.object({
   timestamp: z.string().optional().describe('ISO timestamp of when the error occurred'),
   path: z.string().optional().describe('The API path where the error occurred'),
 });
+export type ApiErrorResponseDto = z.infer<typeof ApiErrorResponseSchema>;
 
-export class ApiErrorResponseDto extends createZodDto(ApiErrorResponseSchema) {}
+export const AuthResponseSchema = z.object({
+  access_token: z.string().describe('The JWT access token'),
+  expires_in: z.number().optional().describe('Token expiration time in seconds'),
+});
+export type AuthResponseDto = z.infer<typeof AuthResponseSchema>;
