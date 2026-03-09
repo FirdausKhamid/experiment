@@ -1,8 +1,17 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/authStore";
 
 export function DashboardView() {
+  const router = useRouter();
+  const logout = useAuthStore((s) => s.logout);
+
+  const handleSignOut = () => {
+    logout();
+    router.replace("/login");
+  };
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-card">
@@ -17,12 +26,9 @@ export function DashboardView() {
             You have successfully logged in. This area is restricted and will contain your personal overview and settings.
           </p>
           <div className="dashboard-actions">
-               <Link
-                href="/login"
-                className="btn-secondary"
-              >
-                Sign out
-              </Link>
+            <button type="button" onClick={handleSignOut} className="btn-secondary">
+              Sign out
+            </button>
           </div>
         </div>
       </div>
