@@ -20,12 +20,12 @@ export type FieldConfig = {
 
 export type FormStep = {
   id: string;
-  title: string;
+  title?: string;
   fields: FieldConfig[];
 };
 
 export type FormModel = {
   id: string;
-  title: string;
+  title?: string;
   steps: FormStep[];
 };

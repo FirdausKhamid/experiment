@@ -5,6 +5,8 @@ export const API_ENDPOINTS = {
   },
   FEATURES: {
     FIND_ALL_PAGINATE: '/features/find-all-paginate',
+    FETCH_BY_ID: (id: number) => `/features/fetch-by-id/${id}`,
+    UPDATE: (id: number) => `/features/${id}`,
   },
   REGIONS: {
     FIND_ALL_PAGINATE: '/regions/find-all-paginate',
