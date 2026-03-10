@@ -1,12 +1,51 @@
-import { Body, Controller, Get, NotFoundException, Param, Put, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Patch, Put, Query } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { FeatureOverridePatchByTargetSchema } from '@experiment/shared';
 import { FeatureFlagsService } from './feature-flags.service';
+import { FeatureOverrideListService } from './feature-override-list.service';
 import { FeatureDto, PaginatedFeatureDto, UpdateFeatureDto } from './dto/feature.dto';
+import { OverrideTargetType } from '../entities/override.entity';
 
 @ApiTags('features')
 @Controller('features')
 export class FeatureFlagsController {
-  constructor(private readonly featureFlagsService: FeatureFlagsService) {}
+  constructor(
+    private readonly featureFlagsService: FeatureFlagsService,
+    private readonly featureOverrideListService: FeatureOverrideListService,
+  ) {}
+
+  @Get('overrides')
+  @ApiOperation({ summary: 'Get feature override list for a target (query: targetType, targetId)' })
+  @ApiOkResponse({ description: 'Full list of features with is_allowed per target' })
+  async getOverrides(
+    @Query('targetType') targetType: string,
+    @Query('targetId') targetId: string,
+  ) {
+    if (!targetType || !targetId?.trim()) {
+      throw new BadRequestException('targetType and targetId are required');
+    }
+    const type = targetType as OverrideTargetType;
+    if (type !== OverrideTargetType.USER && type !== OverrideTargetType.REGION && type !== OverrideTargetType.GROUP) {
+      throw new BadRequestException('targetType must be user, region, or group');
+    }
+    return this.featureOverrideListService.getFeaturesOverrideListForTarget(type, targetId.trim());
+  }
+
+  @Patch('overrides')
+  @ApiOperation({ summary: 'Patch feature overrides for a target (body: targetType, targetId, featureOverrides)' })
+  @ApiOkResponse({ description: 'Updated override list for the target' })
+  async patchOverrides(@Body() body: unknown) {
+    const parsed = FeatureOverridePatchByTargetSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    const targetType = parsed.data.targetType as OverrideTargetType;
+    return this.featureOverrideListService.patchOverridesForTarget(
+      targetType,
+      parsed.data.targetId,
+      { featureOverrides: parsed.data.featureOverrides },
+    );
+  }
 
   @Get('find-all-paginate')
   @ApiOperation({ summary: 'List all features with simple pagination' })
