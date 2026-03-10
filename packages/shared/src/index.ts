@@ -3,3 +3,4 @@ export * from './feature.dto';
 export * from './user.dto';
 export * from './region.dto';
 export * from './group.dto';
+export * from './feature-update.dto';

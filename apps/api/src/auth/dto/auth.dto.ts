@@ -1,6 +1,15 @@
-import { createZodDto } from 'nestjs-zod';
-import { RegisterSchema, LoginSchema, AuthResponseSchema } from '@experiment/shared';
+export class RegisterDto {
+  username!: string;
+  password!: string;
+}
 
-export class RegisterDto extends createZodDto(RegisterSchema) {}
-export class LoginDto extends createZodDto(LoginSchema) {}
-export class AuthResponseDto extends createZodDto(AuthResponseSchema) {}
+export class LoginDto {
+  username!: string;
+  password!: string;
+}
+
+export class AuthResponseDto {
+  access_token!: string;
+  expires_in?: number;
+  features?: string[];
+}

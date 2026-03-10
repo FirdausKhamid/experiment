@@ -1,4 +1,7 @@
-import { createZodDto } from 'nestjs-zod';
-import { ApiErrorResponseSchema } from '@experiment/shared';
-
-export class ApiErrorResponseDto extends createZodDto(ApiErrorResponseSchema) {}
+export class ApiErrorResponseDto {
+  statusCode!: number;
+  message!: string | string[];
+  error!: string;
+  timestamp?: string;
+  path?: string;
+}

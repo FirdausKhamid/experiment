@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Feature } from '../entities/feature.entity';
 import { Override, OverrideTargetType } from '../entities/override.entity';
-import { PaginatedFeatureDto } from '@experiment/shared';
+import { FeatureDto, PaginatedFeatureDto, UpdateFeatureDto } from './dto/feature.dto';
 
 type FeatureContext = {
   userId: string;
@@ -104,6 +104,37 @@ export class FeatureFlagsService {
       total,
       page,
       limit,
+    };
+  }
+
+  async findOneById(id: number): Promise<FeatureDto | null> {
+    const feature = await this.featureRepository.findOne({ where: { id } });
+    if (!feature) return null;
+    return {
+      id: feature.id,
+      key: feature.key,
+      isEnabled: feature.isEnabled,
+      description: feature.description ?? null,
+      updatedAt: feature.updatedAt.toISOString(),
+    };
+  }
+
+  async update(id: number, payload: UpdateFeatureDto): Promise<FeatureDto | null> {
+    const feature = await this.featureRepository.findOne({ where: { id } });
+    if (!feature) return null;
+
+    feature.key = payload.key;
+    feature.isEnabled = payload.isEnabled;
+    feature.description = payload.description ?? feature.description;
+
+    const saved = await this.featureRepository.save(feature);
+
+    return {
+      id: saved.id,
+      key: saved.key,
+      isEnabled: saved.isEnabled,
+      description: saved.description ?? null,
+      updatedAt: saved.updatedAt.toISOString(),
     };
   }
 }
