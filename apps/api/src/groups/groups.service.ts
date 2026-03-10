@@ -49,6 +49,6 @@ export class GroupsService {
       name: group.name,
       createdAt: group.createdAt.toISOString(),
       featuresOverrideList,
-    };
+    } as GroupByIdDto;
   }
 }

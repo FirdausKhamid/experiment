@@ -13,7 +13,8 @@ export type FeatureOverrideListItem = {
   feature_id: number;
   feature_key: string;
   feature_description: string;
-  is_allowed: boolean;
+  /** true | false when override exists, 'default' when no override record. */
+  is_allowed: boolean | 'default';
 };
 
 @Injectable()
@@ -54,7 +55,7 @@ export class FeatureOverrideListService {
       feature_description: f.description ?? '',
       is_allowed: overrideByFeatureId.has(f.id)
         ? !!overrideByFeatureId.get(f.id)
-        : !!f.isEnabled,
+        : ('default' as const),
     }));
   }
   /**

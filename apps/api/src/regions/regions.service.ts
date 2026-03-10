@@ -49,6 +49,6 @@ export class RegionsService {
       name: region.name,
       createdAt: region.createdAt.toISOString(),
       featuresOverrideList,
-    };
+    } as RegionByIdDto;
   }
 }

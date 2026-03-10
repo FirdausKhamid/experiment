@@ -58,7 +58,7 @@ export class UsersService {
       regionId: user.region?.id ?? null,
       createdAt: user.createdAt.toISOString(),
       featuresOverrideList,
-    };
+    } as UserByIdDto;
   }
 
   async findOneByIdWithGroup(id: string): Promise<User | null> {
