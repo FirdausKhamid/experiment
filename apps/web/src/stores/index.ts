@@ -6,3 +6,6 @@ export { useFeatureAStore } from "./featureAStore";
 export { useFeatureBStore } from "./featureBStore";
 export { useFeatureCStore } from "./featureCStore";
 export { useSettingsStore } from "./settingsStore";
+export { useRegionStore } from "./regionStore";
+export { useGroupStore } from "./groupStore";
+export { useUserStore } from "./userStore";
