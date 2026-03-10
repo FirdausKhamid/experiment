@@ -2,7 +2,7 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { RegisterDto } from '@experiment/shared';
+import { RegisterDto, PaginatedUserDto } from '@experiment/shared';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -11,6 +11,31 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
+  async findAllPaginate(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedUserDto> {
+    const [items, total] = await this.usersRepository.findAndCount({
+      relations: ['group', 'region'],
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      items: items.map((u) => ({
+        id: u.id,
+        username: u.username,
+        groupId: u.group?.id ?? null,
+        regionId: u.region?.id ?? null,
+        createdAt: u.createdAt.toISOString(),
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
 
   async findOneByIdWithGroup(id: string): Promise<User | null> {
     return this.usersRepository.findOne({

@@ -6,6 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
+import { RegionsModule } from './regions/regions.module';
+import { GroupsModule } from './groups/groups.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
     UsersModule,
     AuthModule,
     FeatureFlagsModule,
+    RegionsModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
