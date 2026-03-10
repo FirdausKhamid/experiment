@@ -4,14 +4,13 @@ import { Feature } from '../entities/feature.entity';
 import { Override } from '../entities/override.entity';
 import { FeatureFlagsService } from './feature-flags.service';
 import { FeatureFlagsController } from './feature-flags.controller';
-import { FeatureFlagGuard } from './feature-flag.guard';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Feature, Override]), UsersModule],
   controllers: [FeatureFlagsController],
-  providers: [FeatureFlagsService, FeatureFlagGuard],
-  exports: [FeatureFlagsService, FeatureFlagGuard],
+  providers: [FeatureFlagsService],
+  exports: [FeatureFlagsService],
 })
 export class FeatureFlagsModule {}
 
