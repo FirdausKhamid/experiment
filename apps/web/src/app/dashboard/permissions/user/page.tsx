@@ -1,41 +1,29 @@
+"use client";
+
+import { useEffect } from "react";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
 import { TableComponent } from "@/features/dashboard/components/TableComponent";
+import { useUserStore } from "@/stores/userStore";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { UserDto } from "@experiment/shared";
 
-type UserRow = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-};
-
-const userColumns: ColumnDef<UserRow>[] = [
-  {
-    header: "ID",
-    accessorKey: "id",
-  },
-  {
-    header: "Name",
-    accessorKey: "name",
-  },
-  {
-    header: "Email",
-    accessorKey: "email",
-  },
-  {
-    header: "Role",
-    accessorKey: "role",
-  },
-];
-
-const userData: UserRow[] = [
-  { id: "u-001", name: "Alice Johnson", email: "alice@example.com", role: "Admin" },
-  { id: "u-002", name: "Bob Smith", email: "bob@example.com", role: "Manager" },
-  { id: "u-003", name: "Charlie Davis", email: "charlie@example.com", role: "Viewer" },
+const userColumns: ColumnDef<UserDto>[] = [
+  { header: "ID", accessorKey: "id" },
+  { header: "Username", accessorKey: "username" },
+  { header: "Group", accessorKey: "groupId" },
+  { header: "Region", accessorKey: "regionId" },
+  { header: "Created", accessorKey: "createdAt" },
 ];
 
 export default function UserManagementPage() {
+  const { items, total, page, limit, isLoading, error, fetchPage } =
+    useUserStore();
+
+  useEffect(() => {
+    fetchPage(1, 10);
+  }, [fetchPage]);
+
   return (
     <RequireAuth>
       <DashboardLayout>
@@ -44,9 +32,21 @@ export default function UserManagementPage() {
             <h1 className="dashboard-title">User Management</h1>
             <p className="dashboard-subtitle">Manage application users.</p>
 
-            <div className="mt-4">
-              <TableComponent<UserRow> data={userData} columns={userColumns} />
-            </div>
+            {error && (
+              <p className="mt-2 text-sm text-red-600">
+                {Array.isArray(error.message) ? error.message[0] : error.message}
+              </p>
+            )}
+            {isLoading ? (
+              <p className="mt-4 text-gray-500">Loading users…</p>
+            ) : (
+              <div className="mt-4">
+                <TableComponent<UserDto> data={items} columns={userColumns} />
+                <p className="mt-2 text-sm text-gray-500">
+                  Page {page} · {limit} per page · {total} total
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </DashboardLayout>

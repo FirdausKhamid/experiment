@@ -1,56 +1,27 @@
+"use client";
+
+import { useEffect } from "react";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
 import { TableComponent } from "@/features/dashboard/components/TableComponent";
+import { useGroupStore } from "@/stores/groupStore";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { GroupDto } from "@experiment/shared";
 
-type RoleRow = {
-  id: string;
-  name: string;
-  description: string;
-  userCount: number;
-};
-
-const roleColumns: ColumnDef<RoleRow>[] = [
-  {
-    header: "ID",
-    accessorKey: "id",
-  },
-  {
-    header: "Role",
-    accessorKey: "name",
-  },
-  {
-    header: "Description",
-    accessorKey: "description",
-  },
-  {
-    header: "Users",
-    accessorKey: "userCount",
-  },
-];
-
-const roleData: RoleRow[] = [
-  {
-    id: "r-001",
-    name: "Admin",
-    description: "Full system access",
-    userCount: 3,
-  },
-  {
-    id: "r-002",
-    name: "Manager",
-    description: "Manage teams and regions",
-    userCount: 8,
-  },
-  {
-    id: "r-003",
-    name: "Viewer",
-    description: "Read-only access",
-    userCount: 15,
-  },
+const roleColumns: ColumnDef<GroupDto>[] = [
+  { header: "ID", accessorKey: "id" },
+  { header: "Role", accessorKey: "name" },
+  { header: "Created", accessorKey: "createdAt" },
 ];
 
 export default function RoleManagementPage() {
+  const { items, total, page, limit, isLoading, error, fetchPage } =
+    useGroupStore();
+
+  useEffect(() => {
+    fetchPage(1, 10);
+  }, [fetchPage]);
+
   return (
     <RequireAuth>
       <DashboardLayout>
@@ -59,9 +30,21 @@ export default function RoleManagementPage() {
             <h1 className="dashboard-title">Role Management</h1>
             <p className="dashboard-subtitle">Manage roles and permissions.</p>
 
-            <div className="mt-4">
-              <TableComponent<RoleRow> data={roleData} columns={roleColumns} />
-            </div>
+            {error && (
+              <p className="mt-2 text-sm text-red-600">
+                {Array.isArray(error.message) ? error.message[0] : error.message}
+              </p>
+            )}
+            {isLoading ? (
+              <p className="mt-4 text-gray-500">Loading roles…</p>
+            ) : (
+              <div className="mt-4">
+                <TableComponent<GroupDto> data={items} columns={roleColumns} />
+                <p className="mt-2 text-sm text-gray-500">
+                  Page {page} · {limit} per page · {total} total
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </DashboardLayout>
