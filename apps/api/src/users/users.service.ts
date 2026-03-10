@@ -12,6 +12,13 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
+  async findOneByIdWithGroup(id: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: ['group'],
+    });
+  }
+
   async findOneByUsername(username: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { username } });
   }

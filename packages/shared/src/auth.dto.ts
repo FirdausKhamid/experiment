@@ -24,5 +24,6 @@ export type ApiErrorResponseDto = z.infer<typeof ApiErrorResponseSchema>;
 export const AuthResponseSchema = z.object({
   access_token: z.string().describe('The JWT access token'),
   expires_in: z.number().optional().describe('Token expiration time in seconds'),
+  features: z.array(z.string()).optional().describe('Enabled feature keys for the user (for UI filtering)'),
 });
 export type AuthResponseDto = z.infer<typeof AuthResponseSchema>;
