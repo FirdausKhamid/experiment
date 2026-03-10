@@ -26,3 +26,26 @@ export const FeatureOverrideItemSchema = z.object({
 });
 export type FeatureOverrideItem = z.infer<typeof FeatureOverrideItemSchema>;
 
+
+/** Single item for PATCH feature overrides. enabled: "default" = delete override row. */
+export const FeatureOverridePatchItemSchema = z.object({
+  feature_id: z.number(),
+  enabled: z.union([z.boolean(), z.literal('default')]),
+});
+export type FeatureOverridePatchItem = z.infer<typeof FeatureOverridePatchItemSchema>;
+
+/** Target type for feature overrides (user, region, group). */
+export const FeatureOverrideTargetTypeSchema = z.enum(['user', 'region', 'group']);
+export type FeatureOverrideTargetType = z.infer<typeof FeatureOverrideTargetTypeSchema>;
+
+/** Body for PATCH /api/features/overrides (targetType + targetId + featureOverrides). */
+export const FeatureOverridePatchByTargetSchema = z.object({
+  targetType: FeatureOverrideTargetTypeSchema,
+  targetId: z.string().min(1),
+  featureOverrides: z.array(FeatureOverridePatchItemSchema),
+});
+export type FeatureOverridePatchByTargetDto = z.infer<typeof FeatureOverridePatchByTargetSchema>;
+
+/** Payload for service layer (list only; target is passed separately). */
+export type FeatureOverridePatchDto = Pick<FeatureOverridePatchByTargetDto, 'featureOverrides'>;
+
