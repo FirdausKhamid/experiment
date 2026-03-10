@@ -1,5 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Public } from './public.decorator';
 import { RegisterDto, LoginDto, AuthResponseDto } from './dto/auth.dto';
 import { ApiErrorResponseDto } from '../common/dto/api-error.dto';
 import {
@@ -16,6 +17,7 @@ import {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
@@ -35,6 +37,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post('login')
   @ApiOperation({ summary: 'Log in an existing user' })
   @ApiResponse({
