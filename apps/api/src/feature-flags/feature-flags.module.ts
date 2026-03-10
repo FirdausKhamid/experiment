@@ -1,13 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Feature } from '../entities/feature.entity';
+import { Group } from '../entities/group.entity';
 import { Override } from '../entities/override.entity';
+import { Region } from '../entities/region.entity';
+import { User } from '../entities/user.entity';
 import { FeatureFlagsService } from './feature-flags.service';
 import { FeatureFlagsController } from './feature-flags.controller';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Feature, Override]), UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Feature, Override, User, Group, Region]),
+    UsersModule,
+  ],
   controllers: [FeatureFlagsController],
   providers: [FeatureFlagsService],
   exports: [FeatureFlagsService],

@@ -1,13 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Feature } from '../entities/feature.entity';
+import { Group } from '../entities/group.entity';
 import { Override, OverrideTargetType } from '../entities/override.entity';
-import { FeatureDto, PaginatedFeatureDto, UpdateFeatureDto } from './dto/feature.dto';
+import { Region } from '../entities/region.entity';
+import { User } from '../entities/user.entity';
+import {
+  FeatureDto,
+  FeatureOverrideItemDto,
+  PaginatedFeatureDto,
+  UpdateFeatureDto,
+} from './dto/feature.dto';
 
 type FeatureContext = {
   userId: string;
   groupId?: string;
+};
+
+type TargetLabelMaps = {
+  user: Map<string, string>;
+  region: Map<string, string>;
+  group: Map<string, string>;
 };
 
 @Injectable()
@@ -17,6 +31,12 @@ export class FeatureFlagsService {
     private readonly featureRepository: Repository<Feature>,
     @InjectRepository(Override)
     private readonly overrideRepository: Repository<Override>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Group)
+    private readonly groupRepository: Repository<Group>,
+    @InjectRepository(Region)
+    private readonly regionRepository: Repository<Region>,
   ) {}
 
   /**
@@ -100,6 +120,9 @@ export class FeatureFlagsService {
         isEnabled: f.isEnabled,
         description: f.description ?? null,
         updatedAt: f.updatedAt.toISOString(),
+        userOverrides: [],
+        regionOverrides: [],
+        groupOverrides: [],
       })),
       total,
       page,
@@ -107,15 +130,69 @@ export class FeatureFlagsService {
     };
   }
 
+  private async loadTargetLabelMaps(overrides: Override[]): Promise<TargetLabelMaps> {
+    const userIds = [...new Set(overrides.filter((o) => o.targetType === OverrideTargetType.USER).map((o) => o.targetId))];
+    const groupIds = [...new Set(overrides.filter((o) => o.targetType === OverrideTargetType.GROUP).map((o) => o.targetId))];
+    const regionIds = [...new Set(overrides.filter((o) => o.targetType === OverrideTargetType.REGION).map((o) => o.targetId))];
+
+    const [users, groups, regions] = await Promise.all([
+      userIds.length ? this.userRepository.find({ where: { id: In(userIds) }, select: ['id', 'username'] }) : [],
+      groupIds.length ? this.groupRepository.find({ where: { id: In(groupIds) }, select: ['id', 'name'] }) : [],
+      regionIds.length ? this.regionRepository.find({ where: { id: In(regionIds) }, select: ['id', 'name'] }) : [],
+    ]);
+
+    return {
+      user: new Map(users.map((u) => [u.id, u.username])),
+      region: new Map(regions.map((r) => [r.id, r.name])),
+      group: new Map(groups.map((g) => [g.id, g.name])),
+    };
+  }
+
+  private mapOverridesToDto(
+    overrides: Override[] | undefined,
+    labels: TargetLabelMaps,
+  ): {
+    userOverrides: FeatureOverrideItemDto[];
+    regionOverrides: FeatureOverrideItemDto[];
+    groupOverrides: FeatureOverrideItemDto[];
+  } {
+    const toItem = (o: Override): FeatureOverrideItemDto => {
+      const targetType = o.targetType as 'user' | 'region' | 'group';
+      const labelMap = labels[targetType];
+      const targetLabel = labelMap?.get(o.targetId) ?? o.targetId;
+      return {
+        id: o.id,
+        targetType,
+        targetId: o.targetId,
+        targetLabel,
+        isEnabled: o.isEnabled,
+        createdAt: o.createdAt.toISOString(),
+      };
+    };
+    const list = overrides ?? [];
+    return {
+      userOverrides: list.filter((o) => o.targetType === OverrideTargetType.USER).map(toItem),
+      regionOverrides: list.filter((o) => o.targetType === OverrideTargetType.REGION).map(toItem),
+      groupOverrides: list.filter((o) => o.targetType === OverrideTargetType.GROUP).map(toItem),
+    };
+  }
+
   async findOneById(id: number): Promise<FeatureDto | null> {
-    const feature = await this.featureRepository.findOne({ where: { id } });
+    const feature = await this.featureRepository.findOne({
+      where: { id },
+      relations: { overrides: true },
+    });
     if (!feature) return null;
+    const labels = feature.overrides?.length
+      ? await this.loadTargetLabelMaps(feature.overrides)
+      : { user: new Map(), region: new Map(), group: new Map() };
     return {
       id: feature.id,
       key: feature.key,
       isEnabled: feature.isEnabled,
       description: feature.description ?? null,
       updatedAt: feature.updatedAt.toISOString(),
+      ...this.mapOverridesToDto(feature.overrides, labels),
     };
   }
 
@@ -129,12 +206,66 @@ export class FeatureFlagsService {
 
     const saved = await this.featureRepository.save(feature);
 
+    const defaultEnabled = saved.isEnabled;
+    const featureRef = { id: saved.id };
+
+    if (payload.userOverrides !== undefined) {
+      await this.overrideRepository.delete({
+        feature: featureRef,
+        targetType: OverrideTargetType.USER,
+      });
+      for (const targetId of payload.userOverrides) {
+        await this.overrideRepository.save({
+          feature: saved,
+          targetType: OverrideTargetType.USER,
+          targetId,
+          isEnabled: defaultEnabled,
+        });
+      }
+    }
+    if (payload.regionOverrides !== undefined) {
+      await this.overrideRepository.delete({
+        feature: featureRef,
+        targetType: OverrideTargetType.REGION,
+      });
+      for (const targetId of payload.regionOverrides) {
+        await this.overrideRepository.save({
+          feature: saved,
+          targetType: OverrideTargetType.REGION,
+          targetId,
+          isEnabled: defaultEnabled,
+        });
+      }
+    }
+    if (payload.groupOverrides !== undefined) {
+      await this.overrideRepository.delete({
+        feature: featureRef,
+        targetType: OverrideTargetType.GROUP,
+      });
+      for (const targetId of payload.groupOverrides) {
+        await this.overrideRepository.save({
+          feature: saved,
+          targetType: OverrideTargetType.GROUP,
+          targetId,
+          isEnabled: defaultEnabled,
+        });
+      }
+    }
+
+    const withOverrides = await this.featureRepository.findOne({
+      where: { id: saved.id },
+      relations: { overrides: true },
+    });
+    const labels = withOverrides!.overrides?.length
+      ? await this.loadTargetLabelMaps(withOverrides!.overrides)
+      : { user: new Map(), region: new Map(), group: new Map() };
     return {
-      id: saved.id,
-      key: saved.key,
-      isEnabled: saved.isEnabled,
-      description: saved.description ?? null,
-      updatedAt: saved.updatedAt.toISOString(),
+      id: withOverrides!.id,
+      key: withOverrides!.key,
+      isEnabled: withOverrides!.isEnabled,
+      description: withOverrides!.description ?? null,
+      updatedAt: withOverrides!.updatedAt.toISOString(),
+      ...this.mapOverridesToDto(withOverrides!.overrides, labels),
     };
   }
 }
