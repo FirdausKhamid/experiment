@@ -1,7 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GroupsService } from './groups.service';
-import { PaginatedGroupDto } from '@experiment/shared';
+import { PaginatedGroupDto, GroupByIdDto } from '@experiment/shared';
 
 @ApiTags('groups')
 @Controller('groups')
@@ -18,5 +18,14 @@ export class GroupsController {
     const pageNumber = Number(page) || 1;
     const pageSize = Number(limit) || 10;
     return this.groupsService.findAllPaginate(pageNumber, pageSize);
+  }
+
+  @Get('fetch-by-id/:id')
+  @ApiOperation({ summary: 'Fetch a single group (role) by id with features override list' })
+  @ApiOkResponse({ description: 'Group with featuresOverrideList' })
+  async fetchById(@Param('id') id: string): Promise<GroupByIdDto> {
+    const group = await this.groupsService.findOneById(id);
+    if (!group) throw new NotFoundException('Group not found');
+    return group;
   }
 }

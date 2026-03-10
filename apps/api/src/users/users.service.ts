@@ -2,7 +2,9 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { RegisterDto, PaginatedUserDto } from '@experiment/shared';
+import { RegisterDto, PaginatedUserDto, UserByIdDto } from '@experiment/shared';
+import { FeatureOverrideListService } from '../feature-flags/feature-override-list.service';
+import { OverrideTargetType } from '../entities/override.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -10,6 +12,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private readonly featureOverrideListService: FeatureOverrideListService,
   ) {}
 
   async findAllPaginate(
@@ -34,6 +37,27 @@ export class UsersService {
       total,
       page,
       limit,
+    };
+  }
+
+  async findOneById(id: string): Promise<UserByIdDto | null> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['group', 'region'],
+    });
+    if (!user) return null;
+    const featuresOverrideList =
+      await this.featureOverrideListService.getFeaturesOverrideListForTarget(
+        OverrideTargetType.USER,
+        user.id,
+      );
+    return {
+      id: user.id,
+      username: user.username,
+      groupId: user.group?.id ?? null,
+      regionId: user.region?.id ?? null,
+      createdAt: user.createdAt.toISOString(),
+      featuresOverrideList,
     };
   }
 

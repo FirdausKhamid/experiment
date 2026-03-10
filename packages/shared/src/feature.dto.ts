@@ -17,3 +17,12 @@ export const PaginatedFeatureSchema = z.object({
 });
 export type PaginatedFeatureDto = z.infer<typeof PaginatedFeatureSchema>;
 
+/** Single item in a features override list (e.g. for user/region/group fetchById). */
+export const FeatureOverrideItemSchema = z.object({
+  feature_id: z.number(),
+  feature_key: z.string(),
+  feature_description: z.string(),
+  is_allowed: z.boolean(),
+});
+export type FeatureOverrideItem = z.infer<typeof FeatureOverrideItemSchema>;
+

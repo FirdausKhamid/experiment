@@ -1,7 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { PaginatedUserDto } from '@experiment/shared';
+import { PaginatedUserDto, UserByIdDto } from '@experiment/shared';
 
 @ApiTags('users')
 @Controller('users')
@@ -18,5 +18,14 @@ export class UsersController {
     const pageNumber = Number(page) || 1;
     const pageSize = Number(limit) || 10;
     return this.usersService.findAllPaginate(pageNumber, pageSize);
+  }
+
+  @Get('fetch-by-id/:id')
+  @ApiOperation({ summary: 'Fetch a single user by id with features override list' })
+  @ApiOkResponse({ description: 'User with featuresOverrideList' })
+  async fetchById(@Param('id') id: string): Promise<UserByIdDto> {
+    const user = await this.usersService.findOneById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 }

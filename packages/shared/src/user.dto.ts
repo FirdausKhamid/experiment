@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { FeatureOverrideItemSchema } from './feature.dto';
 
 /** User response (no password). */
 export const UserSchema = z.object({
@@ -9,6 +10,12 @@ export const UserSchema = z.object({
   createdAt: z.string(),
 });
 export type UserDto = z.infer<typeof UserSchema>;
+
+/** User by id response (includes features override list). */
+export const UserByIdSchema = UserSchema.extend({
+  featuresOverrideList: z.array(FeatureOverrideItemSchema),
+});
+export type UserByIdDto = z.infer<typeof UserByIdSchema>;
 
 export const PaginatedUserSchema = z.object({
   items: z.array(UserSchema),

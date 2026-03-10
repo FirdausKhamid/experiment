@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
+import { FeatureOverrideListModule } from './feature-flags/feature-override-list.module';
 import { RegionsModule } from './regions/regions.module';
 import { GroupsModule } from './groups/groups.module';
 
@@ -31,6 +32,7 @@ import { GroupsModule } from './groups/groups.module';
     UsersModule,
     AuthModule,
     FeatureFlagsModule,
+    FeatureOverrideListModule,
     RegionsModule,
     GroupsModule,
   ],

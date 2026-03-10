@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { FeatureOverrideItemSchema } from './feature.dto';
 
 /** Group (role) response. */
 export const GroupSchema = z.object({
@@ -7,6 +8,12 @@ export const GroupSchema = z.object({
   createdAt: z.string(),
 });
 export type GroupDto = z.infer<typeof GroupSchema>;
+
+/** Group by id response (includes features override list). */
+export const GroupByIdSchema = GroupSchema.extend({
+  featuresOverrideList: z.array(FeatureOverrideItemSchema),
+});
+export type GroupByIdDto = z.infer<typeof GroupByIdSchema>;
 
 export const PaginatedGroupSchema = z.object({
   items: z.array(GroupSchema),
