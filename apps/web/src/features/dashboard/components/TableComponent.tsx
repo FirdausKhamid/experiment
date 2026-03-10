@@ -10,11 +10,13 @@ import {
 type TableComponentProps<TData> = {
   data: TData[];
   columns: ColumnDef<TData, any>[];
+  onRowClick?: (row: TData) => void;
 };
 
 export function TableComponent<TData>({
   data,
   columns,
+  onRowClick,
 }: TableComponentProps<TData>) {
   const table = useReactTable({
     data,
@@ -45,18 +47,30 @@ export function TableComponent<TData>({
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="border-t border-gray-100 hover:bg-gray-50"
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-2 text-gray-800">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {table.getRowModel().rows.map((row) => {
+            const clickable = typeof onRowClick === "function";
+            return (
+              <tr
+                key={row.id}
+                className={`border-t border-gray-100 hover:bg-gray-50 ${
+                  clickable ? "cursor-pointer" : ""
+                }`}
+                onClick={
+                  clickable
+                    ? () => {
+                        onRowClick(row.original);
+                      }
+                    : undefined
+                }
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-4 py-2 text-gray-800">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
           {table.getRowModel().rows.length === 0 && (
             <tr>
               <td
