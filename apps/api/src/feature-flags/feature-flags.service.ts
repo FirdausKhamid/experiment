@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Feature } from '../entities/feature.entity';
 import { Override, OverrideTargetType } from '../entities/override.entity';
+import { PaginatedFeatureDto } from '@experiment/shared';
 
 type FeatureContext = {
   userId: string;
@@ -83,6 +84,27 @@ export class FeatureFlagsService {
     }
 
     return enabled;
+  }
+
+  async findAllPaginate(page: number, limit: number): Promise<PaginatedFeatureDto> {
+    const [items, total] = await this.featureRepository.findAndCount({
+      order: { updatedAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      items: items.map((f) => ({
+        id: f.id,
+        key: f.key,
+        isEnabled: f.isEnabled,
+        description: f.description ?? null,
+        updatedAt: f.updatedAt.toISOString(),
+      })),
+      total,
+      page,
+      limit,
+    };
   }
 }
 
