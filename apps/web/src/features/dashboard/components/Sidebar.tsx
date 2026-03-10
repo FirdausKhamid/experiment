@@ -14,10 +14,7 @@ function NavItem({ tab, depth = 0 }: { tab: NavigationTab; depth?: number }) {
   const isActive = pathname === tab.href;
 
   return (
-    <div
-      className="sidebar-nav-group"
-      style={{ paddingLeft: depth > 0 ? `${depth * 0.75}rem` : undefined }}
-    >
+    <div className="sidebar-nav-group" data-depth={depth}>
       <Link
         href={tab.href}
         className={`sidebar-nav-link ${isActive ? "sidebar-nav-link-active" : ""}`}

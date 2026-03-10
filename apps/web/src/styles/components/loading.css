@@ -1,0 +1,57 @@
+/* Popup overlay: full-screen backdrop with centered content */
+.loading-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(0 0 0 / 0.3);
+}
+
+/* Loading widget: spinner + optional message */
+.loading-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.loading-widget-spinner {
+  border-radius: 9999px;
+  border-style: solid;
+  border-color: var(--color-gray-300);
+  border-top-color: var(--color-gray-600);
+  animation: loading-widget-spin 0.8s linear infinite;
+}
+
+.loading-widget-spinner--sm {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-width: 2px;
+}
+
+.loading-widget-spinner--md {
+  width: 2rem;
+  height: 2rem;
+  border-width: 2px;
+}
+
+.loading-widget-spinner--lg {
+  width: 3rem;
+  height: 3rem;
+  border-width: 3px;
+}
+
+.loading-widget-message {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-gray-500);
+}
+
+@keyframes loading-widget-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -4,3 +4,5 @@
 @import "./layouts/dashboard.css";
 @import "./components/forms.css";
 @import "./components/buttons.css";
+@import "./components/modals.css";
+@import "./components/loading.css";
