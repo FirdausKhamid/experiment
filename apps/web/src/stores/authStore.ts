@@ -8,6 +8,8 @@ interface AuthState {
   user: AuthResponseDto | null;
   isLoading: boolean;
   error: Failure | null;
+  /** List of feature keys enabled for the current user (from login response). */
+  enabledFeatures: string[] | null;
   login: (credentials: LoginDto) => Promise<boolean>;
   register: (userData: RegisterDto) => Promise<void>;
   logout: () => void;
@@ -19,17 +21,22 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isLoading: false,
       error: null,
+      enabledFeatures: null,
 
       login: async (credentials) => {
         set({ isLoading: true, error: null });
         const result = await authService.login(credentials);
 
         if (isFailure(result)) {
-          set({ error: result, isLoading: false });
+          set({ error: result, isLoading: false, enabledFeatures: null });
           return false;
         }
 
-        set({ user: result, isLoading: false });
+        set({
+          user: result,
+          isLoading: false,
+          enabledFeatures: result.features,
+        });
         return true;
       },
 
@@ -39,15 +46,19 @@ export const useAuthStore = create<AuthState>()(
         const result = await authService.register(userData);
 
         if (isFailure(result)) {
-          set({ error: result, isLoading: false });
+          set({ error: result, isLoading: false, enabledFeatures: null });
           return;
         }
 
-        set({ user: result, isLoading: false });
+        set({
+          user: result,
+          isLoading: false,
+          enabledFeatures: result.features,
+        });
       },
 
       logout: () => {
-        set({ user: null, error: null });
+        set({ user: null, error: null, enabledFeatures: null });
       },
 
       clearError: () => {
@@ -56,7 +67,10 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
-      partialize: (state) => ({ user: state.user }),
+      partialize: (state) => ({
+        user: state.user,
+        enabledFeatures: state.enabledFeatures,
+      }),
     },
   ),
 );
