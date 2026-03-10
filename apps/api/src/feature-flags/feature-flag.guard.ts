@@ -1,8 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { FEATURE_FLAG_KEY } from './feature-flag.decorator';
@@ -31,7 +31,9 @@ export class FeatureFlagGuard implements CanActivate {
     const user = request.user as { userId?: string; username?: string } | null;
 
     if (!user?.userId) {
-      throw new UnauthorizedException('Missing authenticated user for feature check');
+      throw new ForbiddenException(
+        'You are not authorized to access this resource',
+      );
     }
 
     const fullUser = await this.usersService.findOneByIdWithGroup(user.userId);
@@ -43,4 +45,3 @@ export class FeatureFlagGuard implements CanActivate {
     });
   }
 }
-
