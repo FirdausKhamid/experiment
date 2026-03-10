@@ -65,10 +65,11 @@ export function ListFeatures() {
 
           <div className="mt-4">
             <TableComponent<FeatureDto>
-              isLoading={isLoading}
               data={items}
               columns={featureColumns}
               onRowClick={handleRowClick}
+              isLoading={isLoading}
+              loadingMessage="Loading features…"
             />
             <p className="mt-2 text-xs text-gray-500">
               Click a row to view details.
