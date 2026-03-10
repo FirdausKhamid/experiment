@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { ApiErrorResponseDto } from '@experiment/shared';
+import { useAuthStore } from '../stores/authStore';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -12,6 +13,10 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    const token = useAuthStore.getState().user?.access_token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
