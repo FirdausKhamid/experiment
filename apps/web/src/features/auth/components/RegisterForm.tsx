@@ -9,6 +9,7 @@ import { FormBuilder } from "@/utils/forms/FormBuilder";
 import { RegisterFormSchema } from "@/utils/forms/schema";
 import { registerFormModel } from "@/models/form/auth";
 import { FormError } from "@/components/ui/FormError";
+import { SplashScreen } from "@/components/auth/SplashScreen";
 
 type RegisterFormData = {
   username: string;
@@ -17,6 +18,7 @@ type RegisterFormData = {
 };
 
 export function RegisterForm() {
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const { register: doRegister, error, isLoading } = useAuthStore();
   const setModel = useFormModelStore((s) => s.setModel);
 
@@ -24,6 +26,10 @@ export function RegisterForm() {
     setModel(registerFormModel);
     return () => setModel(null);
   }, [setModel]);
+
+  if (!hasHydrated) {
+    return <SplashScreen />;
+  }
 
   const onSubmit = async (data: RegisterFormData) => {
     const payload: RegisterDto = {

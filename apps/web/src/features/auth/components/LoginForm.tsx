@@ -9,9 +9,11 @@ import { LoginSchema, LoginDto } from "@experiment/shared";
 import { FormBuilder } from "@/utils/forms/FormBuilder";
 import { loginFormModel } from "@/models/form/auth";
 import { FormError } from "@/components/ui/FormError";
+import { SplashScreen } from "@/components/auth/SplashScreen";
 
 export function LoginForm() {
   const router = useRouter();
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const user = useAuthStore((s) => s.user);
   const { login, error, isLoading } = useAuthStore();
   const setModel = useFormModelStore((s) => s.setModel);
@@ -23,8 +25,13 @@ export function LoginForm() {
 
   // If already logged in (access_token in store), go to dashboard
   useEffect(() => {
+    if (!hasHydrated) return;
     if (user?.access_token) router.replace("/dashboard");
-  }, [router, user?.access_token]);
+  }, [hasHydrated, router, user?.access_token]);
+
+  if (!hasHydrated) {
+    return <SplashScreen />;
+  }
 
   const onSubmit = async (data: LoginDto) => {
     const success = await login(data);

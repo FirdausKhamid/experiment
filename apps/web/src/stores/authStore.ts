@@ -10,6 +10,8 @@ interface AuthState {
   error: Failure | null;
   /** List of feature keys enabled for the current user (from login response). */
   enabledFeatures: string[] | null;
+  /** True after persisted state has been rehydrated (e.g. on refresh) */
+  _hasHydrated: boolean;
   login: (credentials: LoginDto) => Promise<boolean>;
   register: (userData: RegisterDto) => Promise<void>;
   logout: () => void;
@@ -22,6 +24,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
       enabledFeatures: null,
+      _hasHydrated: false,
 
       login: async (credentials) => {
         set({ isLoading: true, error: null });
