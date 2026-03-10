@@ -27,7 +27,7 @@ export const useRegionStore = create<RegionState>((set, get) => ({
     const nextPage = page ?? current.page;
     const nextLimit = limit ?? current.limit;
 
-    set({ isLoading: true, error: null });
+    set({ items: [], isLoading: true, error: null });
     const result = await regionService.findAllPaginate(nextPage, nextLimit);
 
     if (isFailure(result)) {

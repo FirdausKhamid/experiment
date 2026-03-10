@@ -16,7 +16,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   error: null,
 
   fetch: async () => {
-    set({ isLoading: true, error: null });
+    set({ data: null, isLoading: true, error: null });
     const result = await pageDataService.getSettings();
     if (isFailure(result)) {
       set({ isLoading: false, error: result });

@@ -16,7 +16,7 @@ export const useFeatureCStore = create<FeatureCState>((set) => ({
   error: null,
 
   fetch: async () => {
-    set({ isLoading: true, error: null });
+    set({ data: null, isLoading: true, error: null });
     const result = await pageDataService.getFeatureC();
     if (isFailure(result)) {
       set({ isLoading: false, error: result });

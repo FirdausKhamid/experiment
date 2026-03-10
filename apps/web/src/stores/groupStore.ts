@@ -27,7 +27,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     const nextPage = page ?? current.page;
     const nextLimit = limit ?? current.limit;
 
-    set({ isLoading: true, error: null });
+    set({ items: [], isLoading: true, error: null });
     const result = await groupService.findAllPaginate(nextPage, nextLimit);
 
     if (isFailure(result)) {
