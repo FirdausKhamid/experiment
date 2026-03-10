@@ -3,4 +3,7 @@ export const API_ENDPOINTS = {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
   },
+  FEATURES: {
+    FIND_ALL_PAGINATE: '/features/find-all-paginate',
+  },
 };
