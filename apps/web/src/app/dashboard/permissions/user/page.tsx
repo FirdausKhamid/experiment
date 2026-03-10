@@ -1,15 +1,15 @@
 import { RequireAuth } from "@/components/auth/RequireAuth";
-import { DashboardLayout } from "../../../features/dashboard/components/DashboardLayout";
+import { DashboardLayout } from "@/features/dashboard/components/DashboardLayout";
 
-export default function PermissionsPage() {
+export default function UserManagementPage() {
   return (
     <RequireAuth>
       <DashboardLayout>
         <div className="dashboard-container">
           <div className="dashboard-card">
-            <h1 className="dashboard-title">Permissions</h1>
+            <h1 className="dashboard-title">User Management</h1>
             <p className="dashboard-subtitle">
-              Configure roles and permissions.
+              User management content goes here.
             </p>
           </div>
         </div>

@@ -30,6 +30,23 @@ export const defaultNavigationTabs: NavigationTab[] = [
     feature_key: "permissions",
     label: "Permissions",
     href: "/dashboard/permissions",
-  },
-  { feature_key: "settings", label: "Settings", href: "/dashboard/settings" },
+    children: [
+      {
+        feature_key: "region_management",
+        label: "Region Management",
+        href: "/dashboard/permissions/region",
+        },
+        {
+          feature_key: "role_management",
+          label: "Role Management",
+          href: "/dashboard/permissions/role",
+        },
+        {
+          feature_key: "user_management",
+          label: "Users Management",
+          href: "/dashboard/permissions/user",
+        },
+      ],
+    },
+    { feature_key: "settings", label: "Settings", href: "/dashboard/settings" },
 ];

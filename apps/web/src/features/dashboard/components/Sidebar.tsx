@@ -28,7 +28,7 @@ function NavItem({ tab, depth = 0 }: { tab: NavigationTab; depth?: number }) {
       {tab.children?.length ? (
         <div className="sidebar-nav-children">
           {tab.children.map((child) => (
-            <NavItem key={child.id} tab={child} depth={depth + 1} />
+            <NavItem key={child.feature_key} tab={child} depth={depth + 1} />
           ))}
         </div>
       ) : null}
@@ -42,7 +42,7 @@ export function Sidebar({ tabs, header }: SidebarProps) {
       {header ? <div className="sidebar-header">{header}</div> : null}
       <nav className="sidebar-nav" aria-label="Main navigation">
         {tabs.map((tab) => (
-          <NavItem key={tab.id} tab={tab} />
+          <NavItem key={tab.feature_key} tab={tab} />
         ))}
       </nav>
     </aside>
