@@ -6,7 +6,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.getHttpAdapter().getInstance().disable('etag');
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? true,
     credentials: true,
