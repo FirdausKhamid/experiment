@@ -45,7 +45,10 @@ export class FeatureFlagsService {
    * 2) Group override
    * 3) Global feature default
    */
-  async isEnabled(featureKey: string, context: FeatureContext): Promise<boolean> {
+  async isEnabled(
+    featureKey: string,
+    context: FeatureContext,
+  ): Promise<boolean> {
     const feature = await this.featureRepository.findOne({
       where: { key: featureKey },
     });
@@ -86,27 +89,58 @@ export class FeatureFlagsService {
   }
 
   /**
-   * Convenience helper: compute all enabled feature keys for a user.
-   * This can be used at login time to return a static feature snapshot
-   * to the client if desired.
+   * Compute all enabled feature keys for a user (batch: 3–4 queries instead of 1 + 3N).
+   * Used at login to return a static feature snapshot to the client.
    */
   async getEnabledFeatureKeysForUser(
     context: FeatureContext,
   ): Promise<string[]> {
-    const features = await this.featureRepository.find();
+    const [features, userOverrides, groupOverrides] = await Promise.all([
+      this.featureRepository.find({ order: { id: 'ASC' } }),
+      this.overrideRepository.find({
+        where: {
+          targetType: OverrideTargetType.USER,
+          targetId: context.userId,
+        },
+        relations: ['feature'],
+      }),
+      context.groupId
+        ? this.overrideRepository.find({
+            where: {
+              targetType: OverrideTargetType.GROUP,
+              targetId: context.groupId,
+            },
+            relations: ['feature'],
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const userByFeatureId = new Map(
+      userOverrides.map((o) => [o.feature.id, o.isEnabled]),
+    );
+    const groupByFeatureId = new Map(
+      groupOverrides.map((o) => [o.feature.id, o.isEnabled]),
+    );
+
     const enabled: string[] = [];
-
-    for (const feature of features) {
-      const isOn = await this.isEnabled(feature.key, context);
-      if (isOn) {
-        enabled.push(feature.key);
-      }
+    for (const f of features) {
+      const userVal = userByFeatureId.get(f.id);
+      const groupVal = context.groupId ? groupByFeatureId.get(f.id) : undefined;
+      const isOn =
+        userVal !== undefined
+          ? userVal
+          : groupVal !== undefined
+            ? groupVal
+            : (f.isEnabled ?? false);
+      if (isOn) enabled.push(f.key);
     }
-
     return enabled;
   }
 
-  async findAllPaginate(page: number, limit: number): Promise<PaginatedFeatureDto> {
+  async findAllPaginate(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedFeatureDto> {
     const [items, total] = await this.featureRepository.findAndCount({
       order: { updatedAt: 'DESC' },
       skip: (page - 1) * limit,
@@ -130,15 +164,50 @@ export class FeatureFlagsService {
     };
   }
 
-  private async loadTargetLabelMaps(overrides: Override[]): Promise<TargetLabelMaps> {
-    const userIds = [...new Set(overrides.filter((o) => o.targetType === OverrideTargetType.USER).map((o) => o.targetId))];
-    const groupIds = [...new Set(overrides.filter((o) => o.targetType === OverrideTargetType.GROUP).map((o) => o.targetId))];
-    const regionIds = [...new Set(overrides.filter((o) => o.targetType === OverrideTargetType.REGION).map((o) => o.targetId))];
+  private async loadTargetLabelMaps(
+    overrides: Override[],
+  ): Promise<TargetLabelMaps> {
+    const userIds = [
+      ...new Set(
+        overrides
+          .filter((o) => o.targetType === OverrideTargetType.USER)
+          .map((o) => o.targetId),
+      ),
+    ];
+    const groupIds = [
+      ...new Set(
+        overrides
+          .filter((o) => o.targetType === OverrideTargetType.GROUP)
+          .map((o) => o.targetId),
+      ),
+    ];
+    const regionIds = [
+      ...new Set(
+        overrides
+          .filter((o) => o.targetType === OverrideTargetType.REGION)
+          .map((o) => o.targetId),
+      ),
+    ];
 
     const [users, groups, regions] = await Promise.all([
-      userIds.length ? this.userRepository.find({ where: { id: In(userIds) }, select: ['id', 'username'] }) : [],
-      groupIds.length ? this.groupRepository.find({ where: { id: In(groupIds) }, select: ['id', 'name'] }) : [],
-      regionIds.length ? this.regionRepository.find({ where: { id: In(regionIds) }, select: ['id', 'name'] }) : [],
+      userIds.length
+        ? this.userRepository.find({
+            where: { id: In(userIds) },
+            select: ['id', 'username'],
+          })
+        : [],
+      groupIds.length
+        ? this.groupRepository.find({
+            where: { id: In(groupIds) },
+            select: ['id', 'name'],
+          })
+        : [],
+      regionIds.length
+        ? this.regionRepository.find({
+            where: { id: In(regionIds) },
+            select: ['id', 'name'],
+          })
+        : [],
     ]);
 
     return {
@@ -171,9 +240,15 @@ export class FeatureFlagsService {
     };
     const list = overrides ?? [];
     return {
-      userOverrides: list.filter((o) => o.targetType === OverrideTargetType.USER).map(toItem),
-      regionOverrides: list.filter((o) => o.targetType === OverrideTargetType.REGION).map(toItem),
-      groupOverrides: list.filter((o) => o.targetType === OverrideTargetType.GROUP).map(toItem),
+      userOverrides: list
+        .filter((o) => o.targetType === OverrideTargetType.USER)
+        .map(toItem),
+      regionOverrides: list
+        .filter((o) => o.targetType === OverrideTargetType.REGION)
+        .map(toItem),
+      groupOverrides: list
+        .filter((o) => o.targetType === OverrideTargetType.GROUP)
+        .map(toItem),
     };
   }
 
@@ -196,7 +271,10 @@ export class FeatureFlagsService {
     };
   }
 
-  async update(id: number, payload: UpdateFeatureDto): Promise<FeatureDto | null> {
+  async update(
+    id: number,
+    payload: UpdateFeatureDto,
+  ): Promise<FeatureDto | null> {
     const feature = await this.featureRepository.findOne({ where: { id } });
     if (!feature) return null;
 
@@ -269,4 +347,3 @@ export class FeatureFlagsService {
     };
   }
 }
-
