@@ -107,6 +107,16 @@ npm run lint
 
 Runs lint in all workspaces.
 
+### Testing
+
+From the **repository root**:
+
+```bash
+npm run test
+```
+
+Runs unit tests in `api`, `shared`, and `web` with a simple terminal report (pass/fail). Core test cases cover auth, feature flags, regions, groups, users, shared Zod schemas, and key frontend utils/components. Optional: `npm run test:cov` in a workspace to see coverage.
+
 ---
 
 ## Directory structure
@@ -171,7 +181,7 @@ Planned or candidate improvements.
 
 | Area | Item |
 |------|------|
-| **Testing** | Unit tests for API services (auth, feature flags, overrides). E2E tests for critical flows (login, permissions). |
+| **Testing** | Unit tests (API services, guards, controllers; shared Zod schemas; web utils/stores/components). Simple terminal report by default. E2E for critical flows (login, permissions) optional. |
 | **Security** | Rate limiting on auth endpoints; optional refresh tokens; enforce strong `JWT_SECRET` in production. |
 | **API** | Region in feature-flag resolution (user → group → region → default); pagination consistency; OpenAPI export. |
 | **Web** | Error boundaries; loading/skeleton states; optional PWA or offline hints. |

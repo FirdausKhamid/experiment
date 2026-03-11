@@ -1,22 +1,24 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 describe('AppController', () => {
-  let appController: AppController;
+  it('delegates to AppService methods', () => {
+    const service: AppService = {
+      getHello: () => 'Hello World!',
+      getDashboard: () => 'Dashboard data',
+      getFeatureA: () => 'Feature A data',
+      getFeatureB: () => 'Feature B data',
+      getFeatureC: () => 'Feature C data',
+      getSettings: () => 'Settings data',
+    } as AppService;
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
-    }).compile();
+    const controller = new AppController(service);
 
-    appController = app.get<AppController>(AppController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
+    expect(controller.getHello()).toBe('Hello World!');
+    expect(controller.getDashboard()).toBe('Dashboard data');
+    expect(controller.getFeatureA()).toBe('Feature A data');
+    expect(controller.getFeatureB()).toBe('Feature B data');
+    expect(controller.getFeatureC()).toBe('Feature C data');
+    expect(controller.getSettings()).toBe('Settings data');
   });
 });

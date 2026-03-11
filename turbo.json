@@ -10,6 +10,8 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {}
+    "lint": {},
+    "test": { "dependsOn": ["^build"], "outputs": [] },
+    "test:cov": { "dependsOn": ["^build"], "outputs": ["coverage/**"] }
   }
 }
